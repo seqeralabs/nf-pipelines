@@ -38,6 +38,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextflow-
 
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
       - name: Install Nextflow
         env:
           CAPSULE_LOG: none

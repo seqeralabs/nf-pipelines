@@ -33,7 +33,7 @@ workflow NFPIPELINE {
     INITIALISE(
         params.version,
         params.help,
-        params.validate_params,
+        params.validateParams,
         params.logo
     )
 

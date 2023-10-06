@@ -18,10 +18,10 @@ input:
       description: |
         Structure: val(help)
         Boolean to show the pipeline help message and exit.
-  - validate_params:
+  - validateParams:
       type: boolean
       description: |
-        Structure: val(validate_params)
+        Structure: val(validateParams)
         Whether to validate the parameters prior to starting the pipeline.
 output:
   - summary_params:
