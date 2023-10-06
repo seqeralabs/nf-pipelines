@@ -5,12 +5,20 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
+                    "gatk4/markduplicates": {
+                        "branch": "master",
+                        "git_sha": "2aa9c2981930687792ed861b0a5f9ff7bb568a7d",
+                        "installed_by": ["modules"]
+                    },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "a6e11ac655e744f7ebc724be669dd568ffdc0e80",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
+                    },
+                    "picard/crosscheckfingerprints": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
                     }
                 }
             },
@@ -19,9 +27,7 @@
                     "initialise": {
                         "branch": "master",
                         "git_sha": "8340fb3779fe3233a455aeee1f60ceb203434ab6",
-                        "installed_by": [
-                            "subworkflows"
-                        ]
+                        "installed_by": ["subworkflows"]
                     }
                 }
             }

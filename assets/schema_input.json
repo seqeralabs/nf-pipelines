@@ -11,51 +11,16 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
-                "unique": [
-                    "fastq_1",
-                    "fastq_2"
-                ],
-                "meta": [
-                    "id"
-                ]
+                "unique": [],
+                "meta": ["id"]
             },
-            "fastq_1": {
+            "bam": {
                 "type": "string",
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                "pattern": "^\\S+\\.bam$",
                 "format": "file-path",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                "unique": [
-                    "fastq_2"
-                ]
-            },
-            "fastq_2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                "dependentRequired": [
-                    "fastq_1"
-                ],
-                "anyOf": [
-                    {
-                        "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                        "format": "file-path"
-                    },
-                    {
-                        "type": "string",
-                        "maxLength": 0
-                    }
-                ]
-            },
-            "meta_value": {
-                "type": "string",
-                "errorMessage": "Additional meta_value must be supplied (for demonstration purposes).",
-                "meta": [
-                    "metavalue"
-                ]
+                "errorMessage": "BAM file must be provided and must have extension '.bam'"
             }
         },
-        "required": [
-            "sample",
-            "fastq_1"
-        ]
+        "required": ["sample", "bam"]
     }
 }

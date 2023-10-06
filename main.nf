@@ -16,8 +16,11 @@ include { validateParameters; paramsSummaryLog; fromSamplesheet } from 'plugin/n
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { MULTIQC    } from './modules/nf-core/multiqc/'
-include { INITIALISE } from './subworkflows/nf-core/initialise/'
+include { INITIALISE                    } from './subworkflows/nf-core/initialise/'
+include { GATK4_MARKDUPLICATES          } from './modules/nf-core/gatk4/markduplicates/main'
+include { GATK4_EXTRACTFINGERPRINT      } from './modules/local/gatk4/extractfingerprint/main'
+include { PICARD_CROSSCHECKFINGERPRINTS } from './modules/nf-core/picard/crosscheckfingerprints/main'
+include { MULTIQC                       } from './modules/nf-core/multiqc/'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,8 +30,12 @@ include { INITIALISE } from './subworkflows/nf-core/initialise/'
 
 workflow NFPIPELINE {
 
-    ch_versions = Channel.empty()
-    ch_multiqc  = Channel.empty()
+    ch_versions   = Channel.empty()
+    ch_multiqc    = Channel.empty()
+
+    haplotype_map = Channel.fromPath(params.haplotype_map, checkIfExists: true).collect()
+    fasta         = Channel.fromPath(params.fasta, checkIfExists: true).collect()
+    fai           = Channel.fromPath(params.fai, checkIfExists: true).collect()
 
     INITIALISE(
         params.version,
@@ -40,15 +47,38 @@ workflow NFPIPELINE {
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     Channel
         .fromSamplesheet('input')
-        // Coerces from [ meta, fastq1, fastq2 ] to [ meta, [ fastq1, fastq2 ] ]. Required for nf-core modules.
-        // See https://github.com/nextflow-io/nf-validation/issues/81
-        .map { meta, fastq1, fastq2 -> fastq2 ? tuple(meta, [fastq1, fastq2]) : tuple(meta, [fastq1]) }
+        .map { meta, bam -> [meta, bam, file("${bam.toUriString()}.bai")]}
         .set { ch_input }
 
-    // Run tool or subworkflow here:
-    // TOOL(ch_input, ch_genome)
-    // Add to MultiQC channel:
-    // ch_multiqc  = ch_multiqc.mix(TOOL.out.lint)
+    GATK4_MARKDUPLICATES(
+        ch_input,
+        fasta,
+        fai
+    )
+    ch_versions = ch_versions.mix(GATK4_MARKDUPLICATES.out.versions)
+    ch_multiqc  = ch_multiqc.mix(GATK4_MARKDUPLICATES.out.metrics)
+
+    dedup_bams = GATK4_MARKDUPLICATES.out.bam.join(GATK4_MARKDUPLICATES.out.bai)
+    haplotype_map.view()
+
+    // Currently this fails with exit status 0 because it can't read the 'dictionary'
+    // Thanks GATK!
+    GATK4_EXTRACTFINGERPRINT(
+        dedup_bams,
+        haplotype_map,
+        fasta,
+        fai
+    )
+    ch_versions = ch_versions.mix(GATK4_EXTRACTFINGERPRINT.out.versions)
+    ch_multiqc  = ch_multiqc.mix(GATK4_EXTRACTFINGERPRINT.out.vcf)
+
+    PICARD_CROSSCHECKFINGERPRINTS(
+        GATK4_EXTRACTFINGERPRINT.out.vcf.collect{ it[1] }.map { it -> [[id: "picard"], it] },
+        [],
+        haplotype_map
+    )
+    ch_versions = ch_versions.mix(PICARD_CROSSCHECKFINGERPRINTS.out.versions)
+    ch_multiqc  = ch_multiqc.mix(PICARD_CROSSCHECKFINGERPRINTS.out.crosscheck_metrics)
 
     MULTIQC(
         ch_multiqc.collect{ it[1] },
