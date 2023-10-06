@@ -1,0 +1,55 @@
+nextflow_pipeline {
+
+    name "Test nf-pipelines"
+    script "main.nf"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                outdir = "tests/results"
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow).match()
+        }
+
+    }
+
+    test("Should show --version") {
+
+        when {
+            params {
+                version = true
+                outdir  = "tests/results"
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow).match()
+        }
+
+    }
+
+    test("Should show --help") {
+
+        when {
+            params {
+                help   = true
+                outdir = "tests/results"
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow).match()
+        }
+
+    }
+
+}
+
+
