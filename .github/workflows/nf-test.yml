@@ -24,8 +24,9 @@ jobs:
       matrix:
         profile:
           - "docker"
-          - "singularity"
-          - "conda"
+          # If you want, you can run Singularity and Conda by including these:
+          # - "singularity"
+          # - "conda"
 
     steps:
       - uses: actions/checkout@v3
