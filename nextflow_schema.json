@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/seqeralabs/nfpipelines/master/nextflow_schema.json",
-    "title": "seqeralabs/nfpipelines pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/seqeralabs/nf-pipelines/master/nextflow_schema.json",
+    "title": "seqeralabs/nf-pipelines pipeline parameters",
     "description": "Minimal nf-core pipeline compatible with template",
     "type": "object",
     "definitions": {
