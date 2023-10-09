@@ -33,10 +33,10 @@ workflow NFPIPELINE {
     ch_versions   = Channel.empty()
     ch_multiqc    = Channel.empty()
 
-    haplotype_map = Channel.fromPath(params.haplotype_map, checkIfExists: true).collect()
-    fasta         = Channel.fromPath(params.fasta, checkIfExists: true).collect()
-    fai           = Channel.fromPath(params.fai, checkIfExists: true).collect()
-
+    haplotype_map = Channel.fromPath(params.haplotype_map   , checkIfExists: true).collect()
+    fasta         = Channel.fromPath(params.fasta           , checkIfExists: true).collect()
+    dict          = Channel.fromPath(params.dict            , checkIfExists: true).collect()
+    fai           = params.fai ? Channel.fromPath(params.fai, checkIfExists: true).collect() : Channel.fromPath("${file(params.fasta).toUriString()}.fai", checkIfExists: true).collect()
     INITIALISE(
         params.version,
         params.help,
@@ -59,15 +59,13 @@ workflow NFPIPELINE {
     ch_multiqc  = ch_multiqc.mix(GATK4_MARKDUPLICATES.out.metrics)
 
     dedup_bams = GATK4_MARKDUPLICATES.out.bam.join(GATK4_MARKDUPLICATES.out.bai)
-    haplotype_map.view()
 
-    // Currently this fails with exit status 0 because it can't read the 'dictionary'
-    // Thanks GATK!
     GATK4_EXTRACTFINGERPRINT(
         dedup_bams,
         haplotype_map,
         fasta,
-        fai
+        fai,
+        dict
     )
     ch_versions = ch_versions.mix(GATK4_EXTRACTFINGERPRINT.out.versions)
     ch_multiqc  = ch_multiqc.mix(GATK4_EXTRACTFINGERPRINT.out.vcf)

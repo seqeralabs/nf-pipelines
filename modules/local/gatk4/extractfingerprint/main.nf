@@ -12,10 +12,12 @@ process GATK4_EXTRACTFINGERPRINT {
     path  haplotype_map
     path  fasta
     path  fasta_fai
+    path  sequence_dictionary
 
     output:
-    tuple val(meta), path("*.vcf.gz"), emit: vcf
-    path "versions.yml"              , emit: versions
+    tuple val(meta), path("*.vcf.gz")    , emit: vcf
+    tuple val(meta), path("*.vcf.gz.tbi"), emit: tbi
+    path "versions.yml"                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,6 +27,7 @@ process GATK4_EXTRACTFINGERPRINT {
     prefix = task.ext.prefix ?: "${meta.id}.bam"
 
     def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
+    def bam_name = bam.simpleName
 
     def avail_mem = 3072
     if (!task.memory) {

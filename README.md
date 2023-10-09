@@ -1,59 +1,22 @@
 ## Introduction
 
-**nf-pipelines** is a minimal nf-core pipeline containing as few components as possible. The idea is to be as light as possible while maintaining compatibility with nf-core tools such as modules and subworkflows. You could use this as a template to start your own pipeline or explore alternative methods of working with the nf-core template. 
+**nf-pipelines** is a minimal nf-core pipeline containing as few components as possible. The idea is to be as light as possible while maintaining compatibility with nf-core tools such as modules and subworkflows. You could use this as a template to start your own pipeline or explore alternative methods of working with the nf-core template.
 
 ## Overview
 
-This pipeline uses a samplesheet input, then runs any modules or subworkflows in the `NFPIPELINE` workflow in `main.nf` before completing. As a brief set of instructions, you can add any Nextflow process or workflow within the `NFPIPELINE` block and execute it. We include the `MULTIQC` as an example and generate a report for quality control metrics.
+This pipeline uses a samplesheet input, then runs the GATK/Picard tool to compare samples and check for a sample mix up. It takes a samplesheet of BAM files as input, removes duplicate reads then compares those files at the locations provided by the `--haplotype_map` parameter. Finally it produces a report with MultiQC for summarising and interpreting the results.
 
-## Template instructions
+### Required Inputs
 
-## Make your own repo
+- `input`: Path to samplesheet which must contain the columns `sample` and `bam`. Each BAM file is expected to have an index file located at the same path with additional extension `.bai`.
+- `fasta`: Path to FASTA genome file.
+- `dict`: Path to GATK/Picard dictionary file. If missing it can be created with [GATK CreateSequenceDictionary](https://gatk.broadinstitute.org/hc/en-us/articles/360037422891-CreateSequenceDictionary-Picard-).
+- `haplotype_map`: A path to the haplotype map used by [GATK/Picard CrossCheckFingerprints](https://gatk.broadinstitute.org/hc/en-us/articles/9570489180699-CrosscheckFingerprints-Picard-) and GATK/Picard ExtractFingerprint.
+- `outdir`: Path to output directory. The output files will be added here during the pipeline run.
 
-### Add the repo to your organisation
+### Optional Inputs
 
-- [ ] Fork the repo to your own organisation and change the name to something appropriate
-
-### Template Naming
-
-- [ ] Replace all instances of `nf-pipelines` with the name of your pipeline
-- [ ] Replace all instances of `seqeralabs` with your GitHub username/organization
-- [ ] Run `nf-core lint` to check you have found all references to seqeralabs/nf-pipelines
-
-### Samplesheet handling
-
-- [ ] Update the `assets/schema_input.json` for your own samplesheet. The samplesheet currently uses a forward and reverse FASTQ with an additional `meta_value`, which could represent any sample specific information such as treatment, but you will need to update this for your use case. Use the [nf-validate documentation](https://nextflow-io.github.io/nf-validation/nextflow_schema/sample_sheet_schema_specification/) to guide you.
-
-### Add needed modules/processes
-
-For each module or subworkflow you would like to run, you will need to do one of the following:
-
-- [ ] Add any needed nf-core modules via the cli command `nf-core modules install`
-- [ ] Add any custom processes to the `modules/local` directory
-
-Then do the following steps:
-
-### Modify the main workflow
-
-- [ ] Modify the `main.nf` file to add any needed processes
-
-### Modify the configuration
-
-- [ ] Add any new parameters to the nextflow.config
-- [ ] Each nf-core module uses a task.ext.args for configuring tool parameters. Update these using a configuration item in `nextflow.config`. MULTIQC has been included as an example, but you can also add these in additional configuration files [but you must make sure to import them](https://www.nextflow.io/docs/latest/config.html?highlight=includeconfig#config-include):
-
-```nextflow
-process {
-   withName: 'MULTIQC' {
-      ext.args = "--force --verbose"
-   }
-}
-```
-
-### Documentation
-
-- [ ] Use `nf-core schema build` to build the pipeline parameters and validation. This builds the argument documentation automatically!
-- [ ] Update the documentation so future users can see how to run the pipeline. Include the purpose of the pipeline, instructions on how to use it, how to make the samplesheet and what to expect as outputs.
+- `fai`: Path to genome FASTA index, if not supplied, this will be assumed to be located at the path to the FASTA file plus the additional extension `.fai`.
 
 ## Usage
 
@@ -67,35 +30,38 @@ First, prepare a samplesheet with your input data that looks as follows:
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,bam
+CONTROL_REP1,control_rep1.bam
 ```
 
-Now, you can run the pipeline using:
+To run from a remote version, use the command:
 
 ```bash
-nextflow run seqeralabs/nf-pipelines \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv
+nextflow run seqeralabs/nf-pipeline \
+   -r gatk_fingerprint \
+   --input /path/to/samplesheet.csv \
+   --fasta /path/to/genome.fasta \
+   --haplotype_map /path/to/haplotype-map.txt \
+   --dict /path/to/genome.dict
 ```
+
+Remember if these files are remote to supply them with the Nextflow file operators, e.g. for AWS S3:
+
+```bash
+nextflow run seqeralabs/nf-pipeline \
+   -r gatk_fingerprint \
+   --input 's3://path/to/samplesheet.csv' \
+   --fasta 's3://path/to/genome.fasta' \
+   --haplotype_map 's3://path/to/haplotype-map.txt' \
+   --dict 's3://path/to/genome.dict'
+```
+
+A help command is provided to assist in running the pipeline and can be accessed with `nextflow run seqeralabs/nf-pipeline --help`.
 
 > **Warning:**
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
 > provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
-
-## Background
-
-This format was inspired by [kenibrewer/simplenextflow](https://github.com/kenibrewer/simplenextflow) but it has the following differences:
-
-- It is generated using the template and should be compatible with `nf-core sync` for the foreseeable future
-- It uses the `nf-validate` plugin to reduce boilerplate code
-- It uses the `INITIALISE` subworkflow to remove _even more_ boilerplate code
-- It removes some additional files such as `docs/`
-- It uses Nextflow code to replace the Java classes in `lib/` (see [the initialise subworkflow](./subworkflows/local/initialise.nf))
-- It uses `results` as a default value for `--outdir` to remove one additional parameter user need to supply
-- It removes email and slack integration for simplicity
-- It removes Github features so developers can add their own
 
 ## Credits
 
