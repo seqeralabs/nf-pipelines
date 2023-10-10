@@ -24,7 +24,7 @@ process GATK4_EXTRACTFINGERPRINT {
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}.bam"
+    prefix = task.ext.prefix ?: "${meta.id}"
 
     def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
     def bam_name = bam.simpleName
