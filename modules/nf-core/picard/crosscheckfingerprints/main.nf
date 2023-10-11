@@ -8,8 +8,8 @@ process PICARD_CROSSCHECKFINGERPRINTS {
         'biocontainers/picard:3.0.0--hdfd78af_1' }"
 
     input:
-    tuple val(meta), path(input1)
-    path input2
+    tuple val(meta) , path(input1), path(index)
+    tuple val(meta2), path(input2), path(index2)
     path haplotype_map
 
     output:

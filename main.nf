@@ -70,9 +70,16 @@ workflow NFPIPELINE {
     ch_versions = ch_versions.mix(GATK4_EXTRACTFINGERPRINT.out.versions)
     ch_multiqc  = ch_multiqc.mix(GATK4_EXTRACTFINGERPRINT.out.vcf)
 
+    vcf_ch = GATK4_EXTRACTFINGERPRINT.out.vcf.map { meta, vcf -> [[id: "picard"], vcf] }
+    tbi_ch = GATK4_EXTRACTFINGERPRINT.out.tbi.map { meta, tbi -> [[id: "picard"], tbi] }
+
+    vcf_ch.join(tbi_ch)
+        .groupTuple()
+        .set { crosscheck_input}
+    
     PICARD_CROSSCHECKFINGERPRINTS(
-        GATK4_EXTRACTFINGERPRINT.out.vcf.collect{ it[1] }.map { it -> [[id: "picard"], it] },
-        [],
+        crosscheck_input,
+        [[:], [], []],
         haplotype_map
     )
     ch_versions = ch_versions.mix(PICARD_CROSSCHECKFINGERPRINTS.out.versions)
