@@ -18,6 +18,14 @@ This pipeline uses a samplesheet input, then runs the GATK/Picard tool to compar
 
 - `fai`: Path to genome FASTA index, if not supplied, this will be assumed to be located at the path to the FASTA file plus the additional extension `.fai`.
 
+### Parameters
+
+- `--expect_all_to_match`: Expects all samples to match when comparing samples. Otherwise it will only check matching sample IDs. Defaults to true, turn off with `--expect_all_to_match false`.
+- `--error_when_mismatch`: If true, the pipeline will raise an error if any samples expected to match do not. If not, the pipeline will continue and generate a report. Defaults to off, turn on with `--error_when_mismatch`.
+- `lod_threshold`: The LOD score threshold when mismatching. Defaults to -5 but can be set to any number.
+- `tumor_aware`: Perform the calculations assuming samples contain tumor mutational data. Defaults to off, turn on with `--tumor_aware`.
+- `crosscheck_by`: Make comparisons on a per-file basis or per-sample. Since all VCF files contain 1 sample, these are equivalent. Defaults to `FILE` but `SAMPLE` is also a valid option.
+
 ## Usage
 
 > **Note**
