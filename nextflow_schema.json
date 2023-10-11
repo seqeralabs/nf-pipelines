@@ -5,6 +5,43 @@
     "description": "Minimal nf-core pipeline compatible with template",
     "type": "object",
     "definitions": {
+        "crosscheck_options": {
+            "title": "Crosscheck Options",
+            "type": "object",
+            "description": "Options relating to the crosscheck procedure",
+            "default": "",
+            "properties": {
+                "expect_all_to_match": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Expect all samples to match.",
+                    "help_text": "Expect all samples to match when making the comparison."
+                },
+                "error_when_mismatch": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "The pipeline will fail if a mismatch is observed."
+                },
+                "lod_threshold": {
+                    "type": "number",
+                    "default": -5,
+                    "description": "LOD score threshold for mismatch.",
+                    "help_text": "If any two groups (with the same sample name) match with a LOD score lower than the threshold the tool will exit with a non-zero code to indicate error. Program will also exit with an error if it finds two groups with different sample name that match with a LOD score greater than -LOD_THRESHOLD. LOD score 0 means equal likelihood that the groups match vs. come from different individuals, negative LOD score -N, mean 10^N time more likely that the groups are from different individuals, and +N means 10^N times more likely that the groups are from the same individual."
+                },
+                "tumor_aware": {
+                    "type": "boolean",
+                    "description": "Perform a tumor-aware calculation.",
+                    "help_text": "Perform a tumor-aware calculation. This will increase the comparison significantly but result in valid comparisons for tumor samples."
+                },
+                "crosscheck_by": {
+                    "type": "string",
+                    "default": "FILE",
+                    "enum": ["FILE", "SAMPLE"],
+                    "description": "Make comparisons between this value.",
+                    "help_text": "Make comparisons between this value. If `FILE`, then comparisons are made between files. If `SAMPLE`, then comparisons are made between samples within the VCF files."
+                }
+            }
+        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -171,6 +208,9 @@
         }
     },
     "allOf": [
+        {
+            "$ref": "#/definitions/crosscheck_options"
+        },
         {
             "$ref": "#/definitions/input_output_options"
         },
