@@ -9,6 +9,7 @@ This pipeline uses a samplesheet input, then runs the GATK/Picard tool to compar
 ### Required Inputs
 
 - `input`: Path to samplesheet which must contain the columns `sample` and `bam`. Each BAM file is expected to have an index file located at the same path with additional extension `.bai`.
+- `outdir`: Path to the output directory all files will be uploaded to.
 - `fasta`: Path to FASTA genome file.
 - `dict`: Path to GATK/Picard dictionary file. If missing it can be created with [GATK CreateSequenceDictionary](https://gatk.broadinstitute.org/hc/en-us/articles/360037422891-CreateSequenceDictionary-Picard-).
 - `haplotype_map`: A path to the haplotype map used by [GATK/Picard CrossCheckFingerprints](https://gatk.broadinstitute.org/hc/en-us/articles/9570489180699-CrosscheckFingerprints-Picard-) and GATK/Picard ExtractFingerprint.
