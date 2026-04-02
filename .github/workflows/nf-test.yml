@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   nf-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       NXF_ANSI_LOG: false
       NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
