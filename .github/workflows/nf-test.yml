@@ -29,16 +29,16 @@ jobs:
           # - "conda"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3
         with:
           path: /usr/local/bin/nextflow
           key: ${{ runner.os }}
           restore-keys: |
             ${{ runner.os }}-nextflow-
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62 # v3
         with:
           distribution: "temurin"
           java-version: "17"
@@ -52,7 +52,7 @@ jobs:
 
       - name: Cache nf-test installation
         id: cache-software
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3
         with:
           path: |
             /usr/local/bin/nf-test
@@ -73,7 +73,7 @@ jobs:
 
       - name: Set up miniconda
         if: matrix.profile == 'conda'
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@9f54435e0e72c53962ee863144e47a4b094bfd35 # v2
         with:
           auto-update-conda: true
           channels: conda-forge,bioconda,defaults
@@ -93,7 +93,7 @@ jobs:
             --profile=test,${{ matrix.profile }} \
             --tap=test.tap
 
-      - uses: pcolby/tap-summary@v1
+      - uses: pcolby/tap-summary@3f74dc3bad1d527b8c1d5fa88e2f72a3adb2d9e6 # v1
         with:
           path: >-
             test.tap
