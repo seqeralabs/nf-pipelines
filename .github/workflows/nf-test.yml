@@ -73,7 +73,7 @@ jobs:
 
       - name: Set up miniconda
         if: matrix.profile == 'conda'
-        uses: conda-incubator/setup-miniconda@9f54435e0e72c53962ee863144e47a4b094bfd35 # v2
+        uses: conda-incubator/setup-miniconda@9f54435e0e72c53962ee863144e47a4b094bfd35 # v2.3.0
         with:
           auto-update-conda: true
           channels: conda-forge,bioconda,defaults
